@@ -38,7 +38,7 @@ const int kDefaultPort = 30200;
 const char* kLcmStatusChannel = "IIWA_STATUS";
 const char* kLcmStatusTelemetryChannel = "IIWA_STATUS_TELEMETRY";
 const char* kLcmCommandChannel = "IIWA_COMMAND";
-const double kTimeStep = 0.005;
+const double kTimeStep = 0.001;
 const double kJointLimitSafetyMarginDegree = 1;
 const double kJointTorqueSafetyMarginNm = 60;
 const double kJointTorqueSafetyMarginScale[kNumJoints] = {1, 1, 1, 0.5,
@@ -509,6 +509,7 @@ class KukaFRIClient : public KUKA::FRI::LBRClient {
   }
 
   virtual void command() {
+//    std::cout << "test" << std::endl;
     lcm_client_->UpdateRobotState(robot_id_, robotState());
     if (!lcm_client_->CheckSafety(robot_id_)) {
       lcm_client_->PrintRobotState(robot_id_, std::cerr);
@@ -623,6 +624,7 @@ int do_main() {
   fds.back().events = POLLIN;
   fds.back().revents = 0;
 
+  int a = 0;
   bool success = true;
   while (success) {
     int result = poll(fds.data(), fds.size(), -1);
@@ -642,7 +644,7 @@ int do_main() {
     bool robot_stepped = false;
     for (int i = 0; i < FLAGS_num_robots; i++) {
       if (fds[i].revents != 0) {
-	robot_stepped = true;
+	robot_stepped = true; 
         fds[i].revents = 0;  // TODO(sam.creasey) do I actually need
                              // to clear that?
         success = apps[i].step();
@@ -653,6 +655,9 @@ int do_main() {
     if (robot_stepped) {
       lcm_client.PublishStateUpdate();
     }
+    if(!(a % 1000))
+      lcm_client.PrintRobotState(0, std::cerr);
+    a++;
   }
 
   for (int i = 0; i < FLAGS_num_robots; i++) {

@@ -11,7 +11,7 @@ cc_binary(
     deps = [
         "@drake//lcmtypes:iiwa",
         "@gflags//:gflags",
-        "@kuka_fri//:kuka-fri-lib",
+        "//kuka-fri:kuka-fri-lib",
         "@lcm//:lcm",
     ],
 )
